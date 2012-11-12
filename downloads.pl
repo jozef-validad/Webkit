@@ -32,9 +32,11 @@ use Capture::Tiny qw(capture_stdout capture_merged capture);
 my $TOTAL = 0;
 my $START;
 my $VERBOSE = 0;
+my $PAUSE = 0;
 
 sub main {
     GetOptions(
+        'pause=i'      => \my $pause,
         'u|user=s'     => \my $user,
         'p|password=s' => \my $password,
         'v|verbose'    => \$VERBOSE,
@@ -154,7 +156,15 @@ sub load_status_cb {
     }
 
     printf "Downlodaded $TOTAL resources with $bytes bytes in %.2f seconds\n", $end - $START;
-    $loop->quit();
+
+    if ($PAUSE) {
+        Glib::Timeout->add($PAUSE, sub {
+            $loop->quit();
+        });
+    }
+    else {
+        $loop->quit();
+    }
 }
 
 
